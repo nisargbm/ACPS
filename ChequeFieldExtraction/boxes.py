@@ -10,12 +10,12 @@ def isAccountNumber(width, height, x, y, w, h):
     return False
 
 def isDate(width, height, x, y, w, h):
-    if(x > width//2 and (y + h) < height//2):
+    if(x > width//2 and (y + h) < height//4):
         return True
     return False
 
 def isAmount(width, height, x, y, w, h):
-    if((x > width//2) and (y > width//5 and (y + h)> (height//2 + height//5))):
+    if((x > width//2) and (y > height//4 and (y + h) < (height - height//4))):
         return True
     return False
 
@@ -23,10 +23,10 @@ def find_boxes(img_for_box_extraction_path):
 # Read the image
     img = cv2.imread(img_for_box_extraction_path, 0)
     height, width = img.shape[:2]
-
+    
     img = cv2.resize(img,(width//2, height//2), interpolation = cv2.INTER_AREA)
     height, width = img.shape[:2]
-
+    og_img = img
     # Thresholding the image
     (thresh, img_bin) = cv2.threshold(img, 160, 255,cv2.THRESH_BINARY)
     # Invert the image
@@ -92,17 +92,39 @@ def find_boxes(img_for_box_extraction_path):
     (contours, boundingBoxes) = utils.sort_contours(contours, method="top-to-bottom")
 
     idx = 0
+    account_no_flag = False
+    date_flag = False
+    amount_flag = False
     for c in contours:
         # Returns the location and width,height for every contour
         x, y, w, h = cv2.boundingRect(c)
         if w < width//20 or h < height//20:
             continue
-        if (isAccountNumber(width, height, x, y, w, h) or isDate(width, height, x, y, w, h) or isAmount(width, height, x, y, w, h)):
-            new_img = img[y:y+h, x:x+w]
+        if (isAccountNumber(width, height, x, y, w, h) and not account_no_flag):
+            print("Account Number")
+            account_no_flag = True
+            new_img = og_img[y:y+h, x:x+w]
             utils.display_image('display_image', new_img)
             # cv2.imwrite(dir_path+str(idx) + '.tif', new_img)
             idx = idx+1
             # cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 255), 2)
+        if (isAmount(width, height, x, y, w, h) and not amount_flag):
+            print("Amount")
+            amount_flag = True
+            new_img = og_img[y:y+h, x:x+w]
+            utils.display_image('display_image', new_img)
+            # cv2.imwrite(dir_path+str(idx) + '.tif', new_img)
+            idx = idx+1
+            # cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 255), 2)
+        if (isDate(width, height, x, y, w, h) and not date_flag):
+            print("Date")
+            date_flag = True
+            new_img = og_img[y:y+h, x:x+w]
+            utils.display_image('display_image', new_img)
+            # cv2.imwrite(dir_path+str(idx) + '.tif', new_img)
+            idx = idx+1
+            # cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 255), 2) 
+
 
     # cv2.imshow('captcha_resul', img)
     # cv2.waitKey()
