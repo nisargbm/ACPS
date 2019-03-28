@@ -1,70 +1,108 @@
-import numpy as np
+import utils
+import sys
 import cv2
+import os
+import numpy as np
 
-# img = cv2.imread('Cheque.tif')
-# # cv2.imshow('image', img)
-# # cv2.waitKey(0)
-# # cv2.destroyAllWindows()
-# imgray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
-# # cv2.imshow('color_image',img)
-# # cv2.imshow('gray_image',imgray) 
-# # cv2.waitKey(0)                 # Waits forever for user to press any key
-# # cv2.destroyAllWindows()
+my_path = "./temp1/legal_amount1/"
+my_sample_path = "./output/"
+# filepath = "./samples/"+ str(sys.argv[1])
+# filepath = "./temp/acc/"+ str(sys.argv[1])
+# file_path = "./temp/accNum/"
 
-# ret,thresh = cv2.threshold(imgray,200,255,0)
+store = "./temp1/"
 
-# _, contours, _ = cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-# cv2.drawContours(img, contours, -1, (0,255,0), 3)
+def convertit(img):
+	# utils.display_image1(img)
+	utils.display_image1(img)
+	(thresh, img) = cv2.threshold(img, 32, 255, cv2.THRESH_BINARY_INV)
+	utils.display_image1(img)
+	og_img = img.copy()
+	height, width = img.shape[:2]
+	for i in range(width):
+		counti = np.count_nonzero(img[:,i])
+		if counti<2:
+			img[:,i] = 0
+	front = 0
+	back = 0
+	list_valid = []
+	within_text = False
+	add = False
+	
+	for i in range(width):
+		counti = np.count_nonzero(img[:,i])
+		if counti > 0:
+			if not within_text:
+				front = i
+				back = front + 1
+				within_text = True
+			else:
+				back = back + 1
+		else:
+			if not within_text:
+				continue
+			else:
+				within_text = False
+				list_valid.append([front, back])
 
-# cv2.imshow('color_image',img)
-# # cv2.imshow('gray_image',imgray) 
-# cv2.waitKey(0)                 # Waits forever for user to press any key
-# cv2.destroyAllWindows()
+	if within_text:
+		back = width
+		list_valid.append([front, back])
 
+	print (list_valid)
+	# for x in list_valid:
+	# 	og_img[:, x[0]:x[1]] = 255
+	# utils.display_image1(og_img)
+	image = np.zeros((height, 1), np.uint8)
+	gap = np.zeros((height, 1), np.uint8)
+	for coor in list_valid:
+		h1, w1 = image.shape[:2]
+		h2, w2 = gap.shape[:2]
+		wide = coor[1] - coor[0]
+		vis = np.zeros((height, w1 + w2 + wide), np.uint8)
+		vis[:, :w1] = image
+		vis[:, w1 : w1 + w2] = gap
+		vis[:, w1 + w2 : w1 + w2 + wide] = img[:, coor[0]:coor[1]]
+		image = vis
+	utils.display_image1(image)
+	image = cv2.resize(image,(100, 30), interpolation = cv2.INTER_LINEAR)
+	return image
 
-file_name = 'Cheque.tif'
-img = cv2.imread(file_name)
+			# vis = np.zeros((height, w1+w2), np.uint8)
+			# crop_img = output_image
+			# h1, w1 = amount_image.shape[:2]
+			# h2, w2 = crop_img.shape[:2]
+			# vis = np.zeros((height, w1+w2), np.uint8)
+			# vis[:h1, :w1] = amount_image
+			# vis[:h2, w1:w1+w2] = crop_img
+			# amount_image = vis
 
-img_final = cv2.imread(file_name)
-img2gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-ret, mask = cv2.threshold(img2gray, 180, 255, cv2.THRESH_BINARY)
-image_final = cv2.bitwise_and(img2gray, img2gray, mask=mask)
-ret, new_img = cv2.threshold(image_final, 180, 255, cv2.THRESH_BINARY_INV)
-cv2.imshow('captcha_resul', new_img)
-cv2.waitKey()
-kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (2,2)) 
-erosion = cv2.erode(new_img,kernel,iterations = 2)
-cv2.imshow('captcha_resul', erosion)
-cv2.waitKey()
-kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (5,1))  # to manipulate the orientation of dilution , large x means horizonatally dilating  more, large y means vertically dilating more
-dilated = cv2.dilate(erosion, kernel, iterations=5)  # dilate , more the iteration more the dilation
-cv2.imshow('captcha_resul', dilated)
-cv2.waitKey()
-image, contours, hierarchy = cv2.findContours(dilated,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)
-cv2.drawContours(img, contours, -1, (0,255,0), 3)
-cv2.imshow('captcha_resul', img)
-cv2.waitKey()
-for contour in contours:
-    # get rectangle bounding contour
-    [x, y, w, h] = cv2.boundingRect(contour)
+def deskew(img):
+    m = cv2.moments(img)
+    height, width = img.shape[:2]
+    if abs(m['mu02']) < 1e-2:
+        return img.copy()
+    skew = m['mu11']/m['mu02']
+    M = np.float32([[1, skew, -0.5*width*skew], [0, 1, 0]])
+    img = cv2.warpAffine(img, M, (width, height), flags=cv2.WARP_INVERSE_MAP | cv2.INTER_LINEAR, borderValue=(255,255,255))
+    return img
 
-    # Don't plot small false positives that aren't text
-    if w < 35 and h < 35:
-        continue
+import glob
+onlyfiles = glob.glob(my_sample_path + "*.png")
+print(onlyfiles)
+i=0
+for filepath in onlyfiles:
+	img = cv2.imread(filepath , 0)
+	img = cv2.resize(img,(100, 30), interpolation = cv2.INTER_AREA)
+	(thresh, temp) = cv2.threshold(img, 32, 255, cv2.THRESH_BINARY_INV)
+	# element = cv2.getStructuringElement(cv2.MORPH_RECT,(2,1))
+	# eroded = cv2.erode(temp, element, iterations = 1)
+	(thresh, eroded) = cv2.threshold(temp, 32, 255, cv2.THRESH_BINARY_INV)
+	# img = convertit(eroded)
+	utils.display_image1(eroded)
+	img = deskew(eroded)
+	# __, filename = os.path.split(filepath)
+	utils.display_image1(img)
+	# utils.store_img(store, filename, img, "legal_amount")
+	i+=1
 
-    # draw rectangle around contour on original image
-    cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 255), 2)
-
-    '''
-    #you can crop image and send to OCR  , false detected will return no text :)
-    cropped = img_final[y :y +  h , x : x + w]
-
-    s = file_name + '/crop_' + str(index) + '.jpg' 
-    cv2.imwrite(s , cropped)
-    index = index + 1
-
-    '''
-# write original image with added contours to disk
-cv2.imshow('captcha_result', img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
