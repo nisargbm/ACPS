@@ -125,7 +125,7 @@ def find_boxes(file_name, img_for_box_extraction_path, dir_path, img):
 			new_img = og_img[y:y+h, x:x+w]
 			# new_img = extraction_img[y:y+h, x:x+w]
 			# utils.display_image('display_image', new_img)
-			utils.store_img(dir_path, file_name, new_img, "date7")
+			utils.store_img(dir_path, file_name, new_img, "date1")
 
 	account_number_list = utils.sort_contours_area(account_number_list)
 	amount_list = utils.sort_contours_area(amount_list)
@@ -229,7 +229,7 @@ def refine_date(file_name, img_for_box_extraction_path, dir_path, img):
 		# utils.display_image('display_image', final_img)
 		#final_image = remove_lines(final_img)
 		# utils.store_img(dir_path, file_name, final_img, "date8")
-		utils.store_img(dir_path, file_name, final_img, "date9")
+		utils.store_img(dir_path, file_name, final_img, "date2")
 		img_temp = final_img
 
 	
@@ -435,22 +435,22 @@ if __name__ == "__main__":
 	my_path = "./../IDRBT Cheque Image Dataset/300/"
 	# filepath = "./samples/"+ str(sys.argv[1])
 
-	store = "./temp1/"
+	store = "./temp/"
 
-	# onlyfiles = glob.glob(my_path + "*.tif")#Cheque 309133.tif
-	# print(onlyfiles)
-	# print(len(onlyfiles))
-	# i=0
-	# for filepath in onlyfiles:
-	# 	img = cv2.imread(filepath , 0)
-	# 	height, width = img.shape[:2]
-	# 	# img = cv2.resize(img,(width//2, height//2), interpolation = cv2.INTER_AREA)
-	# 	__, filename = os.path.split(filepath)
-	# 	find_boxes(filename, filepath, store, img)
-	# 	i+=1
+	onlyfiles = glob.glob(my_path + "*.tif")#Cheque 309133.tif
+	print(onlyfiles)
+	print(len(onlyfiles))
+	i=0
+	for filepath in onlyfiles:
+		img = cv2.imread(filepath , 0)
+		height, width = img.shape[:2]
+		# img = cv2.resize(img,(width//2, height//2), interpolation = cv2.INTER_AREA)
+		__, filename = os.path.split(filepath)
+		find_boxes(filename, filepath, store, img)
+		i+=1
 
 	
-	onlyfiles = glob.glob(store + "date7/" + "*.tif")#Cheque 309133.tif 309119 309124 309112
+	onlyfiles = glob.glob(store + "date1/" + "*.tif")#Cheque 309133.tif 309119 309124 309112
 	# onlyfiles = glob.glob(store + "accNum/" + "*.tif")#Cheque 309133.tif 309119 309124 309112
 	print(onlyfiles)
 	i=0

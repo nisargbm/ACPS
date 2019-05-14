@@ -199,103 +199,107 @@ def do_segment(image,name) :
 	ret,thresh = cv2.threshold(gray,127,255,cv2.THRESH_BINARY)
 
 
-	my_filter = np.array(([[-1],[0.5],[-1]]), np.float32)
-	# my_filter = np.ones((5,5),np.float32)/25
-	print (my_filter.shape)
-	temp = thresh.copy()
-	remaining = cv2.filter2D(temp, -1, my_filter)
-	# cv2.imshow("thresh",thresh)
+	# my_filter = np.array(([[-1],[0.5],[-1]]), np.float32)
+	# # my_filter = np.ones((5,5),np.float32)/25
+	# print (my_filter.shape)
+	# temp = thresh.copy()
+	# remaining = cv2.filter2D(temp, -1, my_filter)
+	# # cv2.imshow("thresh",thresh)
 
-	remaining_np = np.asarray(remaining)
-	# utils.display_image1(remaining_np)
-	remaining_np[remaining_np > 0] = 255
-	# cv2.imshow("remaining_np",remaining_np)
+	# remaining_np = np.asarray(remaining)
+	# # utils.display_image1(remaining_np)
+	# remaining_np[remaining_np > 0] = 255
+	# # cv2.imshow("remaining_np",remaining_np)
 
-	h1, w1 = remaining_np.shape[:2]
-	remaining_np[ : 3*(h1//4),:] = 0
-	# cv2.imshow("remaining_np_cut",remaining_np)
+	# h1, w1 = remaining_np.shape[:2]
+	# remaining_np[ : 3*(h1//4),:] = 0
+	# # cv2.imshow("remaining_np_cut",remaining_np)
 
-	final = thresh - remaining_np
-	# cv2.imshow("final_image",final)
-	# cv2.waitKey(0)
-	# cv2.destroyAllWindows()
-	store_path = "./temp1/"
-	__, filename = os.path.split(name)
+	# final = thresh - remaining_np
+	# # cv2.imshow("final_image",final)
+	# # cv2.waitKey(0)
+	# # cv2.destroyAllWindows()
+	# store_path = "./temp/"
+	# __, filename = os.path.split(name)
 
-	utils.store_img(store_path, filename, final, "removed_underline")
+	# # utils.store_img(store_path, filename, final, "name_removed_underline")
+	# utils.store_img(store_path, "7_Cheque 309159.tif", final, "images_for_paper")
 
-	# kernel = np.ones((5,5), np.uint8)
-	# img_dilation = cv2.dilate(final, kernel, iterations=1)
 
-	# # cols = verticalProjection(img_dilation)
-	# # hist = create_histogram(cols, img_dilation)
-	# # cv2.imshow("final", img_dilation)
-	# # utils.display_image1(hist)
+	kernel = np.ones((5,5), np.uint8)
+	img_dilation = cv2.dilate(thresh, kernel, iterations=1)
 
-	# im2,ctrs, hier = cv2.findContours(img_dilation.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	# sorted_ctrs = sorted(ctrs, key=lambda ctr: cv2.boundingRect(ctr)[0])
+	# cols = verticalProjection(img_dilation)
+	# hist = create_histogram(cols, img_dilation)
+	# cv2.imshow("final", img_dilation)
+	# utils.display_image1(hist)
+
+	im2,ctrs, hier = cv2.findContours(img_dilation.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+	sorted_ctrs = sorted(ctrs, key=lambda ctr: cv2.boundingRect(ctr)[0])
 	
-	# display1 = final.copy()
-	# list_all_rect = []
+	display1 = thresh.copy()
+	list_all_rect = []
 
-	# for i, ctr in enumerate(sorted_ctrs):
-	# # Get bounding box
-	# 	x, y, w, h = cv2.boundingRect(ctr)
+	for i, ctr in enumerate(sorted_ctrs):
+	# Get bounding box
+		x, y, w, h = cv2.boundingRect(ctr)
 	
-	# 	threshold_width = width//5
-	# 	threshold_height = height//3
-	# 	print("Threshold Width",threshold_width)
-	# 	print("Threshold Height",threshold_height)
+		threshold_width = width//5
+		threshold_height = height//3
+		print("Threshold Width",threshold_width)
+		print("Threshold Height",threshold_height)
 		
-	# 	if w<=threshold_width and h<=threshold_height :
-	# 		continue
+		if w<=threshold_width and h<=threshold_height :
+			continue
 			
-	# 	print(h,w)
-	# 	list_single_rect = [x,y,x+w,y + h]
-	# 	list_all_rect.append(list_single_rect)
+		print(h,w)
+		list_single_rect = [x,y,x+w,y + h]
+		list_all_rect.append(list_single_rect)
 		
 	
-	# 	cv2.rectangle(display1,(x, y),( x + w, y + h),(90,0,255),2)
+		cv2.rectangle(display1,(x, y),( x + w, y + h),(90,0,255),2)
 	
 	
 	
 	
-	# # print("List of all rectanges detected is :",list_all_rect)
+	# print("List of all rectanges detected is :",list_all_rect)
 	
-	# cv2.imshow('marked area',display1)
-	# cv2.waitKey(0)
-	# cv2.destroyAllWindows()
+	cv2.imshow('marked area',display1)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
 	
-	# #for k in range(6) :
-	# merged_list = []
-	# merged_list = optimize_merge_rectangle(list_all_rect,5)
-	# print("Merged List is at threshold  :" + str(5) ,merged_list)
-	# for j in merged_list:
-	# 	widthi = abs(j[0]-j[2])
-	# 	print("width",widthi)
-	# display2 = final.copy()
-	# for i in merged_list:
+	#for k in range(6) :
+	merged_list = []
+	merged_list = optimize_merge_rectangle(list_all_rect,5)
+	print("Merged List is at threshold  :" + str(5) ,merged_list)
+	for j in merged_list:
+		widthi = abs(j[0]-j[2])
+		print("width",widthi)
+	display2 = thresh.copy()
+	for i in merged_list:
 
-	#   #crop_img = display2[i[1]:i[3],i[0]:i[2]]
-	#   #cv2.imshow('crop',crop_img)
-	#   #cv2.waitKey(0)
-	#   #cv2.destroyAllWindows()
+	  #crop_img = display2[i[1]:i[3],i[0]:i[2]]
+	  #cv2.imshow('crop',crop_img)
+	  #cv2.waitKey(0)
+	  #cv2.destroyAllWindows()
 
-	# 	cv2.rectangle(display2,(i[0],i[1]),(i[2], i[3]),(90,0,255),2)
+		cv2.rectangle(display2,(i[0],i[1]),(i[2], i[3]),(90,0,255),2)
 
 	
 		
-	# cv2.imshow('merged areas at threshold'+str(5)+str(name),display2)
-	# cv2.waitKey(0)
-	# cv2.destroyAllWindows()
+	cv2.imshow('merged areas at threshold'+str(5)+str(name),display2)
+	cv2.waitKey(0)
+	cv2.destroyAllWindows()
 
 
 # In[ ]:
 
 if __name__ == "__main__":
 
-	directory_path = "./temp1/legal_amount1/"
+	directory_path = "./temp/legal_amount_removed_underline/"
 	images = glob.glob(directory_path + "*.tif")
+	# images = glob.glob("./temp/images_for_paper/6_Cheque 309159.tif")
+
 	count = 0
 	for x in images :
 		image = cv2.imread(x, 0)

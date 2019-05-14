@@ -6,7 +6,7 @@ import numpy as np
 
 def extract_boxes(file_name, img_for_extraction_path, dir_path, img):
 	folder_name = filename.split(".")[0]
-	store_loc = dir_path + "date_segmented3/"
+	store_loc = dir_path + "date_segmented2/"
 	print (store_loc)
 	height, width = img.shape[:2]
 	print(width)
@@ -63,7 +63,7 @@ def extract_boxes(file_name, img_for_extraction_path, dir_path, img):
 			vis[gap_y : gap_y + h, gap_x : gap_x + w] = output_image
 			output_image = vis
 			kernel = cv2.getStructuringElement(cv2.MORPH_CROSS, (3,3))
-			output_image = cv2.dilate(output_image, kernel, iterations=2)
+			# output_image = cv2.dilate(output_image, kernel, iterations=2)
 			output_image = cv2.resize(output_image, (28, 28), interpolation = cv2.INTER_AREA)
 			# utils.display_image("image", output_image)
 			utils.store_img(store_loc, "position_" + str(i) + ".tif", output_image , folder_name)
@@ -84,7 +84,7 @@ def extract_boxes(file_name, img_for_extraction_path, dir_path, img):
 
 def extract_boxes1(file_name, img_for_extraction_path, dir_path, img):
 	folder_name = filename.split(".")[0]
-	store_loc = dir_path + "date_segmented3/"
+	store_loc = dir_path + "date_segmented2/"
 	print (store_loc)
 	height, width = img.shape[:2]
 	print(width)
@@ -110,8 +110,8 @@ def extract_boxes1(file_name, img_for_extraction_path, dir_path, img):
 
 if __name__ == "__main__":
 
-	my_path = "./temp1/date9/"
-	store = "./temp1/"
+	my_path = "./temp/date2/"
+	store = "./temp/"
 
 	import glob
 	onlyfiles = glob.glob(my_path + "*.tif") # Cheque 100831.tif

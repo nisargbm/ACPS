@@ -19,10 +19,10 @@ def get_micrcode(file_name, img_for_extraction_path, dir_path, img):
 	# Thresholding the image
 	(thresh, img_bin) = cv2.threshold(img, 127, 255,cv2.THRESH_BINARY)
 	# Invert the image
-	#utils.display_image('display_image', img_bin)
+	# utils.display_image('display_image', img_bin)
 
 	img_bin_inv = 255-img_bin
-	#utils.display_image('display_image', img_bin_inv)
+	# utils.display_image('display_image', img_bin_inv)
 
 	crop_img = img_bin_inv[height - height//6 : ,  : ]
 	# utils.display_image('display_image', crop_img)
@@ -39,7 +39,7 @@ if __name__ == "__main__":
 	my_path = "./../IDRBT Cheque Image Dataset/300/"
 	# filepath = "./samples/"+ str(sys.argv[1])
 
-	store = "./temp1/"
+	store = "./temp/"
 
 	import glob
 	onlyfiles = glob.glob(my_path + "*.tif")

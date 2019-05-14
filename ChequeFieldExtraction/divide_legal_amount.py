@@ -183,8 +183,8 @@ if __name__ == "__main__":
 	import cv2
 	import os
 
-	my_path = "./temp1/legal_amount1/"
-	my_path_amount = "./temp1/amount/"
+	my_path = "./temp/legal_amount/"
+	my_path_amount = "./temp/amount/"
 	# filepath = "./samples/"+ str(sys.argv[1])
 
 	store = "./temp1/"
